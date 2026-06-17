@@ -1,0 +1,36 @@
+@model Gruppe5Projekt.Models.MCAntwortOption
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>MCAntwortOption</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Antworttext)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Antworttext)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.IstRichtig)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.IstRichtig)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MCFrage)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MCFrage.Fragentext)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

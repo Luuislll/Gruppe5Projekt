@@ -1,0 +1,41 @@
+@model IEnumerable<Gruppe5Projekt.Models.PruefungMCFrage>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Pruefung)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MCFrage)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pruefung.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MCFrage.Fragentext)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { pruefungId = item.PruefungId, mcFrageId = item.MCFrageId }) |
+                @Html.ActionLink("Details", "Details", new { pruefungId = item.PruefungId, mcFrageId = item.MCFrageId }) |
+                @Html.ActionLink("Delete", "Delete", new { pruefungId = item.PruefungId, mcFrageId = item.MCFrageId })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
