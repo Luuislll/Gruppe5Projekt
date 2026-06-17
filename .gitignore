@@ -1,0 +1,10 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# SQLite-Datenbankdateien (lokal, via Migration neu erzeugbar)
+*.db
+*.db-shm
+*.db-wal
