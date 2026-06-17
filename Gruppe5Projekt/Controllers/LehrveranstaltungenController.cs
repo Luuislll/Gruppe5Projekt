@@ -54,7 +54,7 @@ namespace Gruppe5Projekt.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Titel,Dozentenname,Niveau,IstDemo")] Lehrveranstaltung lehrveranstaltung)
+        public async Task<IActionResult> Create([Bind("Id,Titel,Dozentenname,Niveau")] Lehrveranstaltung lehrveranstaltung)
         {
             if (ModelState.IsValid)
             {
@@ -86,7 +86,7 @@ namespace Gruppe5Projekt.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Titel,Dozentenname,Niveau,IstDemo")] Lehrveranstaltung lehrveranstaltung)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Titel,Dozentenname,Niveau")] Lehrveranstaltung lehrveranstaltung)
         {
             if (id != lehrveranstaltung.Id)
             {

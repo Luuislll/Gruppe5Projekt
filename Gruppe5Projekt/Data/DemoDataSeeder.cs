@@ -4,9 +4,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Gruppe5Projekt.Data;
 
 /// <summary>
-/// Legt Demodaten an bzw. entfernt sie wieder. Alle erzeugten
-/// Lehrveranstaltungen werden mit <see cref="Lehrveranstaltung.IstDemo"/> = true
-/// markiert, sodass die Demodaten jederzeit gefahrlos entfernt werden können.
+/// Legt Demodaten an bzw. entfernt sie wieder. Das Seeding ist idempotent
+/// (legt nur an, wenn der Bestand leer ist); das Entfernen löscht alle
+/// Lehrveranstaltungen, wobei das Cascade-Delete Kapitel, Fragen, Antworten
+/// und Prüfungen mit aufräumt.
 /// </summary>
 public static class DemoDataSeeder
 {
@@ -42,8 +43,8 @@ public static class DemoDataSeeder
     /// </summary>
     public static async Task SeedAsync(AppDbContext db)
     {
-        // Idempotenz: nur seeden, wenn noch keine Demodaten existieren.
-        if (await db.Lehrveranstaltungen.AnyAsync(l => l.IstDemo))
+        // Idempotenz: nur seeden, wenn noch keine Lehrveranstaltungen existieren.
+        if (await db.Lehrveranstaltungen.AnyAsync())
         {
             return;
         }
@@ -58,8 +59,7 @@ public static class DemoDataSeeder
             {
                 Titel = titel,
                 Dozentenname = Dozenten[rng.Next(Dozenten.Length)],
-                Niveau = rng.Next(2) == 0 ? Niveau.Bachelor : Niveau.Master,
-                IstDemo = true
+                Niveau = rng.Next(2) == 0 ? Niveau.Bachelor : Niveau.Master
             };
 
             // 2–3 Kapitel pro Lehrveranstaltung
@@ -124,9 +124,7 @@ public static class DemoDataSeeder
     /// </summary>
     public static async Task<int> RemoveDemoDataAsync(AppDbContext db)
     {
-        var demoLvs = await db.Lehrveranstaltungen
-            .Where(l => l.IstDemo)
-            .ToListAsync();
+        var demoLvs = await db.Lehrveranstaltungen.ToListAsync();
 
         if (demoLvs.Count == 0)
         {
