@@ -1,5 +1,7 @@
 using Gruppe5Projekt.Data;
+using Gruppe5Projekt.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,13 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Azure Blob Storage (Connection String aus den User Secrets).
+builder.Services.AddAzureClients(clients =>
+{
+    clients.AddBlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage"));
+});
+builder.Services.AddScoped<KapitelMaterialService>();
 
 var app = builder.Build();
 

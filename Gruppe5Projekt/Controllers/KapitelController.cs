@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Gruppe5Projekt.Data;
 using Gruppe5Projekt.Models;
+using Gruppe5Projekt.Services;
 
 namespace Gruppe5Projekt.Controllers
 {
     public class KapitelController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly KapitelMaterialService _materialService;
 
-        public KapitelController(AppDbContext context)
+        public KapitelController(AppDbContext context, KapitelMaterialService materialService)
         {
             _context = context;
+            _materialService = materialService;
         }
 
         // GET: Kapitel
@@ -57,12 +60,25 @@ namespace Gruppe5Projekt.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Titel,Kapitelnummer,Vorlesungsfolien,LehrveranstaltungId")] Kapitel kapitel)
+        public async Task<IActionResult> Create([Bind("Id,Titel,Kapitelnummer,LehrveranstaltungId")] Kapitel kapitel, IFormFile? pdfDatei)
         {
+            if (pdfDatei is not null && !IstPdf(pdfDatei))
+            {
+                ModelState.AddModelError(nameof(pdfDatei), "Es sind nur PDF-Dateien erlaubt.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(kapitel);
                 await _context.SaveChangesAsync();
+
+                // Datei erst nach dem Speichern hochladen, damit die Kapitel-Id feststeht.
+                if (pdfDatei is not null)
+                {
+                    kapitel.Vorlesungsfolien = await _materialService.UploadAsync(kapitel.Id, pdfDatei);
+                    await _context.SaveChangesAsync();
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Dozentenname", kapitel.LehrveranstaltungId);
@@ -91,35 +107,66 @@ namespace Gruppe5Projekt.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Titel,Kapitelnummer,Vorlesungsfolien,LehrveranstaltungId")] Kapitel kapitel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Titel,Kapitelnummer,LehrveranstaltungId")] Kapitel kapitel, IFormFile? pdfDatei)
         {
             if (id != kapitel.Id)
             {
                 return NotFound();
             }
 
+            if (pdfDatei is not null && !IstPdf(pdfDatei))
+            {
+                ModelState.AddModelError(nameof(pdfDatei), "Es sind nur PDF-Dateien erlaubt.");
+            }
+
             if (ModelState.IsValid)
             {
-                try
+                var existing = await _context.Kapitel.FindAsync(id);
+                if (existing == null)
                 {
-                    _context.Update(kapitel);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                existing.Titel = kapitel.Titel;
+                existing.Kapitelnummer = kapitel.Kapitelnummer;
+                existing.LehrveranstaltungId = kapitel.LehrveranstaltungId;
+
+                if (pdfDatei is not null)
                 {
-                    if (!KapitelExists(kapitel.Id))
+                    var neuerBlob = await _materialService.UploadAsync(existing.Id, pdfDatei);
+
+                    // Alte Datei entfernen, falls sie einen anderen Namen hatte.
+                    if (!string.IsNullOrEmpty(existing.Vorlesungsfolien) && existing.Vorlesungsfolien != neuerBlob)
                     {
-                        return NotFound();
+                        await _materialService.DeleteAsync(existing.Vorlesungsfolien);
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    existing.Vorlesungsfolien = neuerBlob;
                 }
+
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Dozentenname", kapitel.LehrveranstaltungId);
             return View(kapitel);
+        }
+
+        // GET: Kapitel/Download/5
+        public async Task<IActionResult> Download(int id)
+        {
+            var kapitel = await _context.Kapitel.FindAsync(id);
+            if (kapitel == null || string.IsNullOrEmpty(kapitel.Vorlesungsfolien))
+            {
+                return NotFound();
+            }
+
+            var datei = await _materialService.DownloadAsync(kapitel.Vorlesungsfolien);
+            if (datei == null)
+            {
+                return NotFound();
+            }
+
+            return File(datei.Value.Content, datei.Value.ContentType, datei.Value.FileName);
         }
 
         // GET: Kapitel/Delete/5
@@ -149,6 +196,7 @@ namespace Gruppe5Projekt.Controllers
             var kapitel = await _context.Kapitel.FindAsync(id);
             if (kapitel != null)
             {
+                await _materialService.DeleteAsync(kapitel.Vorlesungsfolien);
                 _context.Kapitel.Remove(kapitel);
             }
 
@@ -159,6 +207,12 @@ namespace Gruppe5Projekt.Controllers
         private bool KapitelExists(int id)
         {
             return _context.Kapitel.Any(e => e.Id == id);
+        }
+
+        private static bool IstPdf(IFormFile datei)
+        {
+            return datei.ContentType == "application/pdf"
+                   || Path.GetExtension(datei.FileName).Equals(".pdf", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

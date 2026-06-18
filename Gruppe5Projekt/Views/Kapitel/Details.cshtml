@@ -26,7 +26,14 @@
             @Html.DisplayNameFor(model => model.Vorlesungsfolien)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Vorlesungsfolien)
+            @if (!string.IsNullOrEmpty(Model?.Vorlesungsfolien))
+            {
+                <a asp-action="Download" asp-route-id="@Model.Id">@System.IO.Path.GetFileName(Model.Vorlesungsfolien)</a>
+            }
+            else
+            {
+                <span class="text-muted">Keine Datei</span>
+            }
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Lehrveranstaltung)

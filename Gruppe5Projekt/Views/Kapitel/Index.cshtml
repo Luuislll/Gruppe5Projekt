@@ -37,7 +37,14 @@
                 @Html.DisplayFor(modelItem => item.Kapitelnummer)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Vorlesungsfolien)
+                @if (!string.IsNullOrEmpty(item.Vorlesungsfolien))
+                {
+                    <a asp-action="Download" asp-route-id="@item.Id">@System.IO.Path.GetFileName(item.Vorlesungsfolien)</a>
+                }
+                else
+                {
+                    <span class="text-muted">—</span>
+                }
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Lehrveranstaltung.Dozentenname)

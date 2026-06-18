@@ -10,8 +10,8 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <div asp-validation-summary="All" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <label asp-for="Titel" class="control-label"></label>
@@ -24,9 +24,17 @@
                 <span asp-validation-for="Kapitelnummer" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Vorlesungsfolien" class="control-label"></label>
-                <input asp-for="Vorlesungsfolien" class="form-control" />
-                <span asp-validation-for="Vorlesungsfolien" class="text-danger"></span>
+                <label class="control-label">Foliensatz (PDF)</label>
+                @if (!string.IsNullOrEmpty(Model.Vorlesungsfolien))
+                {
+                    <p class="form-text">
+                        Aktuelle Datei:
+                        <a asp-action="Download" asp-route-id="@Model.Id">@System.IO.Path.GetFileName(Model.Vorlesungsfolien)</a>
+                    </p>
+                }
+                <input type="file" name="pdfDatei" accept="application/pdf" class="form-control" />
+                <span class="text-danger">@Html.ValidationMessage("pdfDatei")</span>
+                <small class="form-text text-muted">Nur ausfüllen, um die vorhandene Datei zu ersetzen.</small>
             </div>
             <div class="form-group">
                 <label asp-for="LehrveranstaltungId" class="control-label"></label>
