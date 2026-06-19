@@ -1,0 +1,39 @@
+@model Gruppe5Projekt.Models.MCFrage
+
+@{
+    ViewData["Title"] = "Frage löschen";
+}
+
+<h1>Frage löschen</h1>
+
+<h3 class="text-danger">Soll diese Frage wirklich gelöscht werden?</h3>
+<div>
+    <h4>Frage</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Fragentext)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Fragentext)</dd>
+
+        <dt class="col-sm-2">Antwortmöglichkeiten</dt>
+        <dd class="col-sm-10">
+            <ul class="list-unstyled mb-0">
+                @foreach (var option in Model.AntwortOptionen)
+                {
+                    <li>
+                        @option.Antworttext
+                        @if (option.IstRichtig)
+                        {
+                            <span class="badge bg-success">Korrekt</span>
+                        }
+                    </li>
+                }
+            </ul>
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Löschen" class="btn btn-danger" />
+        <a asp-action="Index" asp-route-kapitelId="@Model.KapitelId">Abbrechen</a>
+    </form>
+</div>

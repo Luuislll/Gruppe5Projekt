@@ -1,0 +1,30 @@
+@model FrageEingabeViewModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="KapitelId" />
+
+<div class="form-group mb-3">
+    <label asp-for="Fragentext" class="control-label"></label>
+    <textarea asp-for="Fragentext" class="form-control" rows="2"></textarea>
+    <span asp-validation-for="Fragentext" class="text-danger"></span>
+</div>
+
+<label class="control-label">Antwortmöglichkeiten</label>
+<p class="text-muted mb-2">Markiere links die genau eine korrekte Antwort.</p>
+<span asp-validation-for="KorrekteAntwortIndex" class="text-danger d-block mb-2"></span>
+
+@for (var i = 0; i < FrageEingabeViewModel.AnzahlAntworten; i++)
+{
+    <div class="mb-2">
+        <div class="input-group">
+            <div class="input-group-text">
+                <input type="radio" asp-for="KorrekteAntwortIndex" value="@i"
+                       aria-label="Antwort @(i + 1) ist korrekt" />
+            </div>
+            <input type="text" name="Antworten[@i]" value="@Model.Antworten[i]"
+                   class="form-control" placeholder="Antwort @(i + 1)" />
+        </div>
+        <span asp-validation-for="Antworten[i]" class="text-danger"></span>
+    </div>
+}

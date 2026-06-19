@@ -34,7 +34,7 @@
                 @Html.DisplayFor(modelItem => item.IstRichtig)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.MCFrage.Fragentext)
+                @Html.DisplayFor(modelItem => item.MCFrage!.Fragentext)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

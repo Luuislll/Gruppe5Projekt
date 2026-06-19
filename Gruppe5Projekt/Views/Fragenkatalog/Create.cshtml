@@ -1,0 +1,28 @@
+@model FrageEingabeViewModel
+
+@{
+    ViewData["Title"] = "Neue Frage";
+}
+
+<h1>Neue Frage</h1>
+<h4>Kapitel: @Model.KapitelTitel</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <partial name="_FrageFormular" model="Model" />
+            <div class="form-group">
+                <input type="submit" value="Frage speichern" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" asp-route-kapitelId="@Model.KapitelId">Zurück zum Fragenkatalog</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
