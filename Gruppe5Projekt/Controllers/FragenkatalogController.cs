@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Gruppe5Projekt.Data;
 using Gruppe5Projekt.Models;
 using Gruppe5Projekt.Models.ViewModels;
+using Gruppe5Projekt.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,10 +15,12 @@ namespace Gruppe5Projekt.Controllers
     public class FragenkatalogController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly KapitelMaterialService _materialService;
 
-        public FragenkatalogController(AppDbContext context)
+        public FragenkatalogController(AppDbContext context, KapitelMaterialService materialService)
         {
             _context = context;
+            _materialService = materialService;
         }
 
         // GET: Fragenkatalog?kapitelId=5
@@ -34,6 +38,70 @@ namespace Gruppe5Projekt.Controllers
             }
 
             return View(kapitel);
+        }
+
+        // POST: Fragenkatalog/GenerateAIQuestion
+        // Erzeugt aus dem hochgeladenen Kapitel-Material (PDF) per KI (Gemini) einen
+        // Fragenvorschlag und gibt ihn als JSON-String an den Client zurück.
+        // Die Gemini-Anbindung ist aktuell noch als Dummy implementiert.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GenerateAIQuestion(int kapitelId)
+        {
+            var kapitel = await _context.Kapitel.FindAsync(kapitelId);
+            if (kapitel == null)
+            {
+                return NotFound();
+            }
+
+            // Ohne hinterlegtes Material kann keine Frage generiert werden.
+            if (string.IsNullOrEmpty(kapitel.Vorlesungsfolien))
+            {
+                return BadRequest("Für dieses Kapitel ist kein Material (PDF) hinterlegt.");
+            }
+
+            // Zugehöriges Material (PDF) aus dem Storage Container laden.
+            var material = await _materialService.DownloadAsync(kapitel.Vorlesungsfolien);
+            if (material == null)
+            {
+                return NotFound("Das hinterlegte Material konnte nicht geladen werden.");
+            }
+
+            await using var pdfStream = material.Value.Content;
+
+            // TODO: PDF-Inhalt an Gemini übergeben und daraus eine Frage generieren lassen.
+            // Vorerst als Dummy: das geladene PDF wird noch nicht ausgewertet.
+            var generierteFrage = ErzeugeDummyFrage(kapitel);
+
+            var json = JsonSerializer.Serialize(generierteFrage, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            });
+
+            // Die JSON-Struktur wird als String an den Client übergeben.
+            return Content(json, "application/json");
+        }
+
+        /// <summary>
+        /// Liefert eine Platzhalter-Frage, solange die Gemini-Anbindung noch
+        /// nicht implementiert ist. Die Struktur entspricht dem, was später aus
+        /// der KI-Antwort erzeugt werden soll.
+        /// </summary>
+        private static object ErzeugeDummyFrage(Kapitel kapitel)
+        {
+            return new
+            {
+                KapitelId = kapitel.Id,
+                Fragentext = $"(Beispiel) Welche Aussage zum Kapitel \"{kapitel.Titel}\" ist korrekt?",
+                Antworten = new[]
+                {
+                    new { Antworttext = "Beispielantwort A", IstRichtig = true },
+                    new { Antworttext = "Beispielantwort B", IstRichtig = false },
+                    new { Antworttext = "Beispielantwort C", IstRichtig = false },
+                    new { Antworttext = "Beispielantwort D", IstRichtig = false }
+                }
+            };
         }
 
         // GET: Fragenkatalog/Create?kapitelId=5
