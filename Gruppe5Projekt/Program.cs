@@ -1,3 +1,4 @@
+using Google.GenAI;
 using Gruppe5Projekt.Data;
 using Gruppe5Projekt.Services;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,11 @@ builder.Services.AddAzureClients(clients =>
     clients.AddBlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage"));
 });
 builder.Services.AddScoped<KapitelMaterialService>();
+
+// Gemini-Client aus dem SDK (API-Key aus den User Secrets unter "Gemini:ApiKey").
+var geminiApiKey = builder.Configuration["Gemini:ApiKey"];
+builder.Services.AddSingleton(new Client(apiKey: geminiApiKey));
+builder.Services.AddScoped<GeminiQuestionService>();
 
 var app = builder.Build();
 

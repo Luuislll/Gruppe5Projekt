@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Gruppe5Projekt.Data;
 using Gruppe5Projekt.Models;
 using Gruppe5Projekt.Models.ViewModels;
@@ -16,11 +15,16 @@ namespace Gruppe5Projekt.Controllers
     {
         private readonly AppDbContext _context;
         private readonly KapitelMaterialService _materialService;
+        private readonly GeminiQuestionService _geminiService;
 
-        public FragenkatalogController(AppDbContext context, KapitelMaterialService materialService)
+        public FragenkatalogController(
+            AppDbContext context,
+            KapitelMaterialService materialService,
+            GeminiQuestionService geminiService)
         {
             _context = context;
             _materialService = materialService;
+            _geminiService = geminiService;
         }
 
         // GET: Fragenkatalog?kapitelId=5
@@ -43,7 +47,6 @@ namespace Gruppe5Projekt.Controllers
         // POST: Fragenkatalog/GenerateAIQuestion
         // Erzeugt aus dem hochgeladenen Kapitel-Material (PDF) per KI (Gemini) einen
         // Fragenvorschlag und gibt ihn als JSON-String an den Client zurück.
-        // Die Gemini-Anbindung ist aktuell noch als Dummy implementiert.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GenerateAIQuestion(int kapitelId)
@@ -69,39 +72,38 @@ namespace Gruppe5Projekt.Controllers
 
             await using var pdfStream = material.Value.Content;
 
-            // TODO: PDF-Inhalt an Gemini übergeben und daraus eine Frage generieren lassen.
-            // Vorerst als Dummy: das geladene PDF wird noch nicht ausgewertet.
-            var generierteFrage = ErzeugeDummyFrage(kapitel);
+            // PDF an Gemini übergeben und eine MC-Frage generieren lassen.
+            var generierteFrage = await _geminiService.GenerateQuestionAsync(kapitel, pdfStream);
 
-            var json = JsonSerializer.Serialize(generierteFrage, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
-
-            // Die JSON-Struktur wird als String an den Client übergeben.
-            return Content(json, "application/json");
-        }
-
-        /// <summary>
-        /// Liefert eine Platzhalter-Frage, solange die Gemini-Anbindung noch
-        /// nicht implementiert ist. Die Struktur entspricht dem, was später aus
-        /// der KI-Antwort erzeugt werden soll.
-        /// </summary>
-        private static object ErzeugeDummyFrage(Kapitel kapitel)
-        {
-            return new
+            // Frage samt Antwortoptionen sofort in den Katalog übernehmen (DB-Update).
+            var frage = new MCFrage
             {
                 KapitelId = kapitel.Id,
-                Fragentext = $"(Beispiel) Welche Aussage zum Kapitel \"{kapitel.Titel}\" ist korrekt?",
-                Antworten = new[]
-                {
-                    new { Antworttext = "Beispielantwort A", IstRichtig = true },
-                    new { Antworttext = "Beispielantwort B", IstRichtig = false },
-                    new { Antworttext = "Beispielantwort C", IstRichtig = false },
-                    new { Antworttext = "Beispielantwort D", IstRichtig = false }
-                }
+                Fragentext = generierteFrage.Fragentext,
+                AntwortOptionen = generierteFrage.Antworten
+                    .Select(a => new MCAntwortOption
+                    {
+                        Antworttext = a.Antworttext,
+                        IstRichtig = a.IstRichtig
+                    })
+                    .ToList()
             };
+
+            _context.MCFragen.Add(frage);
+            await _context.SaveChangesAsync();
+
+            // Gespeicherte Frage (inkl. vergebener IDs) an den Client zurückgeben,
+            // damit dieser sie direkt in die Liste einfügen kann.
+            return Json(new
+            {
+                id = frage.Id,
+                fragentext = frage.Fragentext,
+                antworten = frage.AntwortOptionen.Select(a => new
+                {
+                    antworttext = a.Antworttext,
+                    istRichtig = a.IstRichtig
+                })
+            });
         }
 
         // GET: Fragenkatalog/Create?kapitelId=5

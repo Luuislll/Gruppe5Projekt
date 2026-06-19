@@ -23,16 +23,17 @@
 @* Antiforgery-Token für den AJAX-Aufruf an GenerateAIQuestion. *@
 <form id="ki-fragen-form">@Html.AntiForgeryToken()</form>
 
+<div id="fragen-liste">
 @if (!Model.MCFragen.Any())
 {
-    <p class="text-muted">Für dieses Kapitel sind noch keine Fragen angelegt.</p>
+    <p class="text-muted" id="keine-fragen">Für dieses Kapitel sind noch keine Fragen angelegt.</p>
 }
 else
 {
     var nummer = 1;
     foreach (var frage in Model.MCFragen)
     {
-        <div class="card mb-3">
+        <div class="card mb-3 frage-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>Frage @nummer: @frage.Fragentext</strong>
                 <span>
@@ -56,6 +57,7 @@ else
         nummer++;
     }
 }
+</div>
 
 @* Modal für die KI-gestützte Fragengenerierung. *@
 <div class="modal fade" id="kiFragenModal" tabindex="-1" aria-labelledby="kiFragenModalLabel"
@@ -97,6 +99,54 @@ else
             const token = document.querySelector('#ki-fragen-form input[name="__RequestVerificationToken"]').value;
             const url = '@Url.Action("GenerateAIQuestion", "Fragenkatalog")';
 
+            // Hängt eine neu generierte Frage als Karte in die Liste ein.
+            function fuegeFrageEin(frage) {
+                const liste = document.getElementById('fragen-liste');
+
+                // Platzhalter "noch keine Fragen" entfernen, falls vorhanden.
+                document.getElementById('keine-fragen')?.remove();
+
+                const nummer = liste.querySelectorAll('.frage-card').length + 1;
+
+                const card = document.createElement('div');
+                card.className = 'card mb-3 frage-card';
+
+                const header = document.createElement('div');
+                header.className = 'card-header d-flex justify-content-between align-items-center';
+
+                const titel = document.createElement('strong');
+                titel.textContent = `Frage ${nummer}: ${frage.fragentext}`;
+
+                const aktionen = document.createElement('span');
+                const edit = document.createElement('a');
+                edit.href = '/Fragenkatalog/Edit/' + frage.id;
+                edit.textContent = 'Bearbeiten';
+                const loeschen = document.createElement('a');
+                loeschen.href = '/Fragenkatalog/Delete/' + frage.id;
+                loeschen.textContent = 'Löschen';
+                aktionen.append(edit, document.createTextNode(' | '), loeschen);
+
+                header.append(titel, aktionen);
+
+                const optionen = document.createElement('ul');
+                optionen.className = 'list-group list-group-flush';
+                for (const option of frage.antworten) {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item' + (option.istRichtig ? ' list-group-item-success' : '');
+                    li.textContent = option.antworttext;
+                    if (option.istRichtig) {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-success float-end';
+                        badge.textContent = 'Korrekt';
+                        li.appendChild(badge);
+                    }
+                    optionen.appendChild(li);
+                }
+
+                card.append(header, optionen);
+                liste.appendChild(card);
+            }
+
             btn.addEventListener('click', async function () {
                 // Modal in den Lade-Zustand versetzen und öffnen.
                 ladenEl.classList.remove('d-none');
@@ -118,9 +168,9 @@ else
                         throw new Error('Der Server antwortete mit Status ' + response.status + '.');
                     }
 
-                    // JSON-String der generierten Frage entgegennehmen.
-                    const fragenJson = await response.text();
-                    console.log('Von Gemini erhaltene Frage:', fragenJson);
+                    // Die gespeicherte Frage entgegennehmen und direkt in die Liste einfügen.
+                    const frage = await response.json();
+                    fuegeFrageEin(frage);
 
                     // Erfolg: Modal schließen.
                     modal.hide();
