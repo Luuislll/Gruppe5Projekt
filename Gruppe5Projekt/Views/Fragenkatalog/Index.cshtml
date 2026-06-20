@@ -33,10 +33,11 @@ else
     var nummer = 1;
     foreach (var frage in Model.MCFragen)
     {
-        <div class="card mb-3 frage-card">
+        <div class="card mb-3 frage-card" data-frage-id="@frage.Id">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>Frage @nummer: @frage.Fragentext</strong>
                 <span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary pruefen-btn">Prüfen</button> |
                     <a asp-action="Edit" asp-route-id="@frage.Id">Bearbeiten</a> |
                     <a asp-action="Delete" asp-route-id="@frage.Id">Löschen</a>
                 </span>
@@ -53,6 +54,7 @@ else
                     </li>
                 }
             </ul>
+            <div class="card-footer pruef-ergebnis d-none"></div>
         </div>
         nummer++;
     }
@@ -110,6 +112,7 @@ else
 
                 const card = document.createElement('div');
                 card.className = 'card mb-3 frage-card';
+                card.dataset.frageId = frage.id;
 
                 const header = document.createElement('div');
                 header.className = 'card-header d-flex justify-content-between align-items-center';
@@ -118,13 +121,19 @@ else
                 titel.textContent = `Frage ${nummer}: ${frage.fragentext}`;
 
                 const aktionen = document.createElement('span');
+                const pruefen = document.createElement('button');
+                pruefen.type = 'button';
+                pruefen.className = 'btn btn-sm btn-outline-secondary pruefen-btn';
+                pruefen.textContent = 'Prüfen';
                 const edit = document.createElement('a');
                 edit.href = '/Fragenkatalog/Edit/' + frage.id;
                 edit.textContent = 'Bearbeiten';
                 const loeschen = document.createElement('a');
                 loeschen.href = '/Fragenkatalog/Delete/' + frage.id;
                 loeschen.textContent = 'Löschen';
-                aktionen.append(edit, document.createTextNode(' | '), loeschen);
+                aktionen.append(
+                    pruefen, document.createTextNode(' | '),
+                    edit, document.createTextNode(' | '), loeschen);
 
                 header.append(titel, aktionen);
 
@@ -143,9 +152,108 @@ else
                     optionen.appendChild(li);
                 }
 
-                card.append(header, optionen);
+                const ergebnis = document.createElement('div');
+                ergebnis.className = 'card-footer pruef-ergebnis d-none';
+
+                card.append(header, optionen, ergebnis);
                 liste.appendChild(card);
             }
+
+            const pruefUrl = '@Url.Action("PruefeFrage", "Fragenkatalog")';
+
+            // Stellt das Prüfergebnis einer Frage im card-footer dar.
+            function zeigeErgebnis(container, ergebnis) {
+                container.className = 'card-footer pruef-ergebnis '
+                    + (ergebnis.istGueltig ? 'border-success' : 'border-danger');
+                container.innerHTML = '';
+
+                const kopf = document.createElement('div');
+                kopf.className = 'fw-bold mb-2 ' + (ergebnis.istGueltig ? 'text-success' : 'text-danger');
+                kopf.textContent = ergebnis.istGueltig
+                    ? '✓ Frage ist gültig'
+                    : '✗ Frage weist Mängel auf';
+                container.appendChild(kopf);
+
+                const kriterien = [
+                    ['Sprachlich korrekt', ergebnis.sprachlichKorrekt],
+                    ['Genau eine richtige Antwort', ergebnis.genauEineRichtigeAntwort],
+                    ['Eindeutig beantwortbar', ergebnis.beantwortbar]
+                ];
+                const liste = document.createElement('ul');
+                liste.className = 'list-unstyled mb-2';
+                for (const [text, ok] of kriterien) {
+                    const li = document.createElement('li');
+                    li.className = ok ? 'text-success' : 'text-danger';
+                    li.textContent = (ok ? '✓ ' : '✗ ') + text;
+                    liste.appendChild(li);
+                }
+                container.appendChild(liste);
+
+                if (ergebnis.begruendung) {
+                    const p = document.createElement('p');
+                    p.className = 'mb-1';
+                    p.textContent = ergebnis.begruendung;
+                    container.appendChild(p);
+                }
+
+                if (ergebnis.verbesserungsvorschlaege && ergebnis.verbesserungsvorschlaege.length) {
+                    const titel = document.createElement('div');
+                    titel.className = 'fw-bold';
+                    titel.textContent = 'Verbesserungsvorschläge:';
+                    const vlist = document.createElement('ul');
+                    vlist.className = 'mb-0';
+                    for (const v of ergebnis.verbesserungsvorschlaege) {
+                        const li = document.createElement('li');
+                        li.textContent = v;
+                        vlist.appendChild(li);
+                    }
+                    container.append(titel, vlist);
+                }
+
+                container.classList.remove('d-none');
+            }
+
+            // Prüfen-Buttons über Event-Delegation behandeln (auch für neu eingefügte Karten).
+            document.getElementById('fragen-liste').addEventListener('click', async function (e) {
+                const pruefBtn = e.target.closest('.pruefen-btn');
+                if (!pruefBtn) {
+                    return;
+                }
+
+                const card = pruefBtn.closest('.frage-card');
+                const frageId = card.dataset.frageId;
+                const container = card.querySelector('.pruef-ergebnis');
+
+                pruefBtn.disabled = true;
+                const urspruenglich = pruefBtn.textContent;
+                pruefBtn.textContent = 'Prüfen …';
+                container.className = 'card-footer pruef-ergebnis text-muted';
+                container.textContent = 'Gemini prüft die Frage …';
+                container.classList.remove('d-none');
+
+                try {
+                    const response = await fetch(pruefUrl, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token,
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: 'id=' + encodeURIComponent(frageId)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Der Server antwortete mit Status ' + response.status + '.');
+                    }
+
+                    zeigeErgebnis(container, await response.json());
+                } catch (fehler) {
+                    container.className = 'card-footer pruef-ergebnis text-danger';
+                    container.textContent = 'Bei der Prüfung ist ein Fehler aufgetreten: ' + fehler.message;
+                } finally {
+                    pruefBtn.disabled = false;
+                    pruefBtn.textContent = urspruenglich;
+                }
+            });
 
             btn.addEventListener('click', async function () {
                 // Modal in den Lade-Zustand versetzen und öffnen.

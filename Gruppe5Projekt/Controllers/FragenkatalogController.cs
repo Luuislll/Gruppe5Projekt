@@ -106,6 +106,40 @@ namespace Gruppe5Projekt.Controllers
             });
         }
 
+        // POST: Fragenkatalog/PruefeFrage
+        // Lässt eine bestehende Frage per KI (Gemini) auf sprachliche Korrektheit und
+        // eindeutige Beantwortbarkeit (genau eine richtige Antwort) prüfen und gibt das
+        // Ergebnis als JSON zurück.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PruefeFrage(int id)
+        {
+            var frage = await _context.MCFragen
+                .Include(f => f.AntwortOptionen)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (frage == null)
+            {
+                return NotFound();
+            }
+
+            var antworten = frage.AntwortOptionen
+                .Select(a => new GenerierteAntwort(a.Antworttext, a.IstRichtig))
+                .ToList();
+
+            var ergebnis = await _geminiService.VerifyQuestionAsync(frage.Fragentext, antworten);
+
+            return Json(new
+            {
+                istGueltig = ergebnis.IstGueltig,
+                sprachlichKorrekt = ergebnis.SprachlichKorrekt,
+                genauEineRichtigeAntwort = ergebnis.GenauEineRichtigeAntwort,
+                beantwortbar = ergebnis.Beantwortbar,
+                begruendung = ergebnis.Begruendung,
+                verbesserungsvorschlaege = ergebnis.Verbesserungsvorschlaege ?? new List<string>()
+            });
+        }
+
         // GET: Fragenkatalog/Create?kapitelId=5
         public async Task<IActionResult> Create(int kapitelId)
         {
