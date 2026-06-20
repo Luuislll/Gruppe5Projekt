@@ -35,6 +35,7 @@ namespace Gruppe5Projekt.Controllers
 
             var lehrveranstaltung = await _context.Lehrveranstaltungen
                 .Include(l => l.Kapitel)
+                .Include(l => l.Pruefungen)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lehrveranstaltung == null)
             {
