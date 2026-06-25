@@ -9,16 +9,16 @@
 <h4>Kapitel @Model.Kapitelnummer: @Model.Titel</h4>
 <hr />
 
-<p>
-    <a asp-action="Create" asp-route-kapitelId="@Model.Id" class="btn btn-primary">Neue Frage anlegen</a>
+<div class="d-flex flex-wrap gap-2 mb-4">
     <button type="button" id="ki-fragen-btn" class="btn btn-success"
             data-kapitel-id="@Model.Id"
             @(hatMaterial ? "" : "disabled")
             title="@(hatMaterial ? "Fragen aus dem hochgeladenen Material (PDF) generieren" : "Es ist kein Material (PDF) hinterlegt.")">
-        Fragen Erstellen
+        <i class="bi bi-cpu"></i> Neue Frage generieren
     </button>
-    <a asp-controller="Kapitel" asp-action="Details" asp-route-id="@Model.Id">Zurück zum Kapitel</a>
-</p>
+    <a asp-action="Create" asp-route-kapitelId="@Model.Id" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Neue Frage anlegen</a>
+    <a asp-controller="Kapitel" asp-action="Index" asp-route-lehrveranstaltungId="@Model.LehrveranstaltungId" class="btn btn-outline-secondary ms-auto"><i class="bi bi-arrow-left"></i> Zurück zu den Kapiteln</a>
+</div>
 
 @* Antiforgery-Token für den AJAX-Aufruf an GenerateAIQuestion. *@
 <form id="ki-fragen-form">@Html.AntiForgeryToken()</form>
@@ -36,10 +36,10 @@ else
         <div class="card mb-3 frage-card" data-frage-id="@frage.Id">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>Frage @nummer: @frage.Fragentext</strong>
-                <span>
-                    <button type="button" class="btn btn-sm btn-outline-secondary pruefen-btn">Prüfen</button> |
-                    <a asp-action="Edit" asp-route-id="@frage.Id">Bearbeiten</a> |
-                    <a asp-action="Delete" asp-route-id="@frage.Id">Löschen</a>
+                <span class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-info pruefen-btn"><i class="bi bi-robot"></i> Prüfen</button>
+                    <a asp-action="Edit" asp-route-id="@frage.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+                    <a asp-action="Delete" asp-route-id="@frage.Id" class="btn btn-danger"><i class="bi bi-trash"></i> Löschen</a>
                 </span>
             </div>
             <ul class="list-group list-group-flush">
@@ -121,19 +121,20 @@ else
                 titel.textContent = `Frage ${nummer}: ${frage.fragentext}`;
 
                 const aktionen = document.createElement('span');
+                aktionen.className = 'd-flex gap-2';
                 const pruefen = document.createElement('button');
                 pruefen.type = 'button';
-                pruefen.className = 'btn btn-sm btn-outline-secondary pruefen-btn';
-                pruefen.textContent = 'Prüfen';
+                pruefen.className = 'btn btn-outline-info pruefen-btn';
+                pruefen.innerHTML = '<i class="bi bi-robot"></i> Prüfen';
                 const edit = document.createElement('a');
                 edit.href = '/Fragenkatalog/Edit/' + frage.id;
-                edit.textContent = 'Bearbeiten';
+                edit.className = 'btn btn-warning';
+                edit.innerHTML = '<i class="bi bi-pencil"></i> Bearbeiten';
                 const loeschen = document.createElement('a');
                 loeschen.href = '/Fragenkatalog/Delete/' + frage.id;
-                loeschen.textContent = 'Löschen';
-                aktionen.append(
-                    pruefen, document.createTextNode(' | '),
-                    edit, document.createTextNode(' | '), loeschen);
+                loeschen.className = 'btn btn-danger';
+                loeschen.innerHTML = '<i class="bi bi-trash"></i> Löschen';
+                aktionen.append(pruefen, edit, loeschen);
 
                 header.append(titel, aktionen);
 

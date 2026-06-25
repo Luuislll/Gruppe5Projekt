@@ -86,8 +86,8 @@ public static class DemoDataSeeder
                 lv.Kapitel.Add(kapitel);
             }
 
-            // 1–2 Prüfungen pro Lehrveranstaltung
-            var anzahlPruefungen = rng.Next(1, 3);
+            // 1 Prüfung pro Lehrveranstaltung (übersichtlich halten)
+            var anzahlPruefungen = 1;
             for (var p = 0; p < anzahlPruefungen; p++)
             {
                 var pruefung = new Pruefung

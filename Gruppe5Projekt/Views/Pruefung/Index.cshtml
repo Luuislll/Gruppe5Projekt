@@ -2,34 +2,55 @@
 
 @{
     ViewData["Title"] = "Prüfungen";
+    var lehrveranstaltungId = (int)ViewBag.LehrveranstaltungId;
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold">Prüfungsübersicht</h2>
-            <p class="text-muted mb-0">Verwaltung der Klausuren für diese Lehrveranstaltung</p>
+            <p class="text-muted mb-0">Klausuren für <strong>@ViewBag.LehrveranstaltungTitel</strong></p>
         </div>
-        
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPruefungModal">
-            <i class="bi bi-patch-plus"></i> Neue Prüfung erstellen
-        </button>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Lehrveranstaltungen" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Zurück zu den Lehrveranstaltungen
+            </a>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPruefungModal">
+                <i class="bi bi-patch-plus"></i> Neue Prüfung erstellen
+            </button>
+        </div>
     </div>
+
+    @if (TempData["FragenFehler"] != null)
+    {
+        <div class="alert alert-danger">@TempData["FragenFehler"]</div>
+    }
+    @if (TempData["FragenHinweis"] != null)
+    {
+        <div class="alert alert-warning">@TempData["FragenHinweis"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Für diese Lehrveranstaltung sind noch keine Prüfungen vorhanden.</div>
+    }
 
     <div class="row">
         @foreach (var pruefung in Model)
         {
             <div class="col-md-4 mb-3">
-                <div class="card shadow-sm border-0 rounded-3 border-start border-4 border-primary">
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold text-dark"><i class="bi bi-calendar-event"></i> @pruefung.Datum.ToString("dd.MM.yyyy")</h5>
-                        <p class="card-text text-secondary small">Zugeordnete Fragen: @pruefung.PruefungMCFragen?.Count</p>
-                        
-                        <a asp-action="Druckansicht" asp-route-id="@pruefung.Id" target="_blank" class="btn btn-sm btn-outline-dark w-100 mt-2">
-                            <i class="bi bi-printer"></i> Druckbare Fragenliste öffnen
-                        </a>
+                <a asp-action="Druckansicht" asp-route-id="@pruefung.Id" target="_blank" class="text-decoration-none">
+                    <div class="card shadow-sm border-0 rounded-3 border-start border-4 border-primary h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-dark"><i class="bi bi-calendar-event"></i> @pruefung.Datum.ToString("dd.MM.yyyy")</h5>
+                            <p class="card-text text-secondary small mb-2">Zugeordnete Fragen: @pruefung.PruefungMCFragen.Count</p>
+                            <span class="btn btn-sm btn-outline-dark w-100">
+                                <i class="bi bi-printer"></i> Druckbare Fragenliste öffnen
+                            </span>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         }
     </div>
@@ -37,9 +58,9 @@
 
 <div class="modal fade" id="createPruefungModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form asp-action="FragenZusammenstellen" method="post">
+        <form asp-action="Erstellen" method="post">
             @Html.AntiForgeryToken()
-            <input type="hidden" name="lehrveranstaltungId" value="@ViewBag.LehrveranstaltungId" />
+            <input type="hidden" name="lehrveranstaltungId" value="@lehrveranstaltungId" />
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Klausur zusammenstellen</h5>

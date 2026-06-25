@@ -12,15 +12,12 @@
     <div class="col-md-6">
         <form asp-action="Edit" asp-route-id="@Model.Id">
             <partial name="_FrageFormular" model="Model" />
-            <div class="form-group">
-                <input type="submit" value="Änderungen speichern" class="btn btn-primary" />
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Änderungen speichern</button>
+                <a asp-action="Index" asp-route-kapitelId="@Model.KapitelId" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Zurück zum Fragenkatalog</a>
             </div>
         </form>
     </div>
-</div>
-
-<div class="mt-3">
-    <a asp-action="Index" asp-route-kapitelId="@Model.KapitelId">Zurück zum Fragenkatalog</a>
 </div>
 
 @section Scripts {
