@@ -20,7 +20,7 @@
                 <tr>
                     <th>Titel</th>
                     <th>Dozent/-in</th>
-                    <th>Typ</th>
+                    <th>Niveau</th>
                     <th class="text-center">Kapitel</th>
                     <th class="text-center">Prüfungen</th>
                     <th class="text-end">Aktionen</th>
@@ -33,14 +33,14 @@
                         <td class="fw-bold">@lv.Titel</td>
                         <td>@lv.Dozentenname</td>
                         <td><span class="badge bg-secondary">@lv.Niveau</span></td> <td class="text-center">
-                            <a asp-controller="Kapitel" asp-action="Index" asp-route-lehrveranstaltungId="@lv.Id" class="btn btn-outline-primary btn-sm position-relative">
+                            <a asp-controller="Kapitel" asp-action="Index" asp-route-lehrveranstaltungId="@lv.Id" class="btn btn-primary position-relative">
                                 <i class="bi bi-book"></i> Kapitel
                                 <span class="badge bg-primary rounded-pill">@lv.Kapitel.Count</span>
                             </a>
                         </td>
                         
                         <td class="text-center">
-                            <a asp-controller="Pruefung" asp-action="Index" asp-route-lehrveranstaltungId="@lv.Id" class="btn btn-outline-purple btn-sm" style="color: #6f42c1; border-color: #6f42c1;">
+                            <a asp-controller="Pruefung" asp-action="Index" asp-route-lehrveranstaltungId="@lv.Id" class="btn btn-purple">
                                 <i class="bi bi-file-earmark-text"></i> Prüfungen
                                 <span class="badge text-white rounded-pill" style="background-color: #6f42c1;">@lv.Pruefungen.Count</span>
                             </a>
@@ -48,8 +48,8 @@
                         
                         <td class="text-end">
                             <div class="btn-group">
-                                <a asp-action="Edit" asp-route-id="@lv.Id" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
-                                <a asp-action="Delete" asp-route-id="@lv.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                                <a asp-action="Edit" asp-route-id="@lv.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+                                <a asp-action="Delete" asp-route-id="@lv.Id" class="btn btn-danger"><i class="bi bi-trash"></i> Löschen</a>
                             </div>
                         </td>
                     </tr>

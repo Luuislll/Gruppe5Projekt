@@ -43,8 +43,8 @@
         </dd>
     </dl>
 </div>
-<div>
-    <a asp-controller="Fragenkatalog" asp-action="Index" asp-route-kapitelId="@Model?.Id">Fragenkatalog</a> |
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="d-flex gap-2">
+    <a asp-controller="Fragenkatalog" asp-action="Index" asp-route-kapitelId="@Model?.Id" class="btn btn-primary"><i class="bi bi-question-circle"></i> Fragenkatalog</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+    <a asp-action="Index" asp-route-lehrveranstaltungId="@Model?.LehrveranstaltungId" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Zurück zur Liste</a>
 </div>

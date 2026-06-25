@@ -68,7 +68,7 @@
                             Fragen zusammenstellen
                         </button>
                         <a asp-controller="Pruefung" asp-action="Details" asp-route-id="@pruefung.Id"
-                           class="btn btn-outline-secondary btn-sm">Details</a>
+                           class="btn btn-secondary btn-sm">Details</a>
                     </span>
                 </li>
             }
@@ -117,7 +117,7 @@
     }
 </div>
 
-<div class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="d-flex gap-2 mt-3">
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+    <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Zurück zur Liste</a>
 </div>

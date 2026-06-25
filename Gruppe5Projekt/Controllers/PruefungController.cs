@@ -229,7 +229,7 @@ namespace Gruppe5Projekt.Controllers
             {
                 _context.Add(pruefung);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { lehrveranstaltungId = pruefung.LehrveranstaltungId });
             }
             ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Dozentenname", pruefung.LehrveranstaltungId);
             return View(pruefung);
@@ -282,7 +282,7 @@ namespace Gruppe5Projekt.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { lehrveranstaltungId = pruefung.LehrveranstaltungId });
             }
             ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Dozentenname", pruefung.LehrveranstaltungId);
             return View(pruefung);
@@ -313,13 +313,20 @@ namespace Gruppe5Projekt.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var pruefung = await _context.Pruefungen.FindAsync(id);
+            var lehrveranstaltungId = pruefung?.LehrveranstaltungId;
             if (pruefung != null)
             {
                 _context.Pruefungen.Remove(pruefung);
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            if (lehrveranstaltungId == null)
+            {
+                return RedirectToAction(nameof(LehrveranstaltungenController.Index), "Lehrveranstaltungen");
+            }
+
+            return RedirectToAction(nameof(Index), new { lehrveranstaltungId });
         }
 
         private bool PruefungExists(int id)

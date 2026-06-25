@@ -28,15 +28,12 @@
                 <select asp-for="MCFrageId" class="form-control" asp-items="ViewBag.MCFrageId"></select>
                 <span asp-validation-for="MCFrageId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Speichern</button>
+                <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Zurück zur Liste</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
