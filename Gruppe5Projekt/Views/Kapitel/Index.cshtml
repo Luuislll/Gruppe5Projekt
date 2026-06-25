@@ -1,61 +1,56 @@
-@model IEnumerable<Gruppe5Projekt.Models.Kapitel>
+@model Gruppe5Projekt.Models.Lehrveranstaltung
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Kapitel von " + Model.Titel;
 }
 
-<h1>Index</h1>
+<div class="container mt-4">
+    <div class="card bg-light border-0 shadow-sm p-4 mb-4">
+        <h2 class="fw-bold text-primary"><i class="bi bi-mortarboard"></i> @Model.Titel</h2>
+        <p class="mb-0 text-muted">
+            <strong>Dozent/-in:</strong> @Model.Dozentenname | 
+            <strong>Studiengang:</strong> <span class="badge bg-secondary">@Model.Niveau</span>
+        </p>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Titel)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Kapitelnummer)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Vorlesungsfolien)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Lehrveranstaltung)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Titel)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Kapitelnummer)
-            </td>
-            <td>
-                @if (!string.IsNullOrEmpty(item.Vorlesungsfolien))
-                {
-                    <a asp-action="Download" asp-route-id="@item.Id">@System.IO.Path.GetFileName(item.Vorlesungsfolien)</a>
-                }
-                else
-                {
-                    <span class="text-muted">—</span>
-                }
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Lehrveranstaltung!.Dozentenname)
-            </td>
-            <td>
-                <a asp-controller="Fragenkatalog" asp-action="Index" asp-route-kapitelId="@item.Id">Fragenkatalog</a> |
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold">Veranstaltungskapitel</h4>
+        <a asp-action="Create" asp-route-lehrveranstaltungId="@Model.Id" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-lg"></i> Neues Kapitel hinzufügen
+        </a>
+    </div>
+
+    <div class="list-group shadow-sm rounded-3 bg-white">
+        @foreach (var kapitel in Model.Kapitel!.OrderBy(k => k.Kapitelnummer))
+        {
+            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                <div>
+                    <h6 class="mb-1 fw-bold">Kapitel @kapitel.Kapitelnummer: @kapitel.Titel</h6>
+                    
+                    @if (!string.IsNullOrEmpty(kapitel.Vorlesungsfolien))
+                    {
+                        <a href="@kapitel.Vorlesungsfolien" target="_blank" class="btn btn-link btn-sm p-0 text-success text-decoration-none">
+                            <i class="bi bi-file-earmark-pdf-fill"></i> Vorlesungsfolien ansehen
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-muted small"><i class="bi bi-file-earmark-x"></i> Keine Datei hochgeladen</span>
+                    }
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <a asp-action="Fragen" asp-route-id="@kapitel.Id" class="btn btn-outline-primary btn-sm position-relative">
+                        <i class="bi bi-question-circle"></i> Fragenkatalog
+                        <span class="badge bg-danger rounded-pill">@kapitel.MCFragen?.Count</span>
+                    </a>
+
+                    <div class="btn-group">
+                        <a asp-action="Edit" asp-route-id="@kapitel.Id" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                        <a asp-action="Delete" asp-route-id="@kapitel.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,105 @@
+@model Gruppe5Projekt.Models.Kapitel
+
+@{
+    ViewData["Title"] = "Fragen zu Kapitel " + Model.Kapitelnummer;
+}
+
+<div class="container mt-4" style="max-width: 850px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold">Fragenkatalog</h3>
+            <p class="text-muted mb-0">Kapitel @Model.Kapitelnummer: @Model.Titel</p>
+        </div>
+        
+        <form asp-controller="KI" asp-action="FrageGenerieren" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="kapitelId" value="@Model.Id" />
+            <button type="submit" class="btn btn-purple text-white" style="background-color: #6f42c1;" @(string.IsNullOrEmpty(Model.Vorlesungsfolien) ? "disabled" : "")>
+                <i class="bi bi-cpu"></i> Neue Frage generieren
+            </button>
+        </form>
+    </div>
+
+    @if (!Model.MCFragen!.Any())
+    {
+        <div class="alert alert-info">Für dieses Kapitel wurden noch keine Fragen angelegt oder generiert.</div>
+    }
+
+    @foreach (var frage in Model.MCFragen!)
+    {
+        <div class="list-group shadow-sm mb-4">
+            <div class="list-group-item active bg-dark border-dark fw-bold">
+                <i class="bi bi-patch-question"></i> @frage.Fragentext
+            </div>
+
+            @foreach (var antwort in frage.AntwortOptionen)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-center @(antwort.IstRichtig ? "list-group-item-success fw-bold text-success" : "")">
+                    <div>
+                        <i class="bi @(antwort.IstRichtig ? "bi-check-circle-fill" : "bi-circle")"></i> @antwort.Antworttext
+                    </div>
+                    @if (antwort.IstRichtig)
+                    {
+                        <span class="badge bg-success">Richtig</span>
+                    }
+                </div>
+            }
+
+            <div class="list-group-item bg-light d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-sm btn-outline-info" onclick="pruefeFrageMitKI(@frage.Id)">
+                    <i class="bi bi-robot"></i> Qualität per KI prüfen
+                </button>
+
+                <div class="btn-group">
+                    <a asp-controller="MCFrage" asp-action="Edit" asp-route-id="@frage.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+                    <a asp-controller="MCFrage" asp-action="Delete" asp-route-id="@frage.Id" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Löschen</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="kiPruefungModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-robot"></i> Gemini KI-Prüfbericht</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalLadeAnzeige" class="text-center my-4">
+                    <div class="spinner-border text-info" role="status"></div>
+                    <p class="mt-2 text-muted">Gemini analysiert Frage und Antwortoptionen...</p>
+                </div>
+                <div id="modalErgebnisText" class="fs-5" style="display:none; white-space: pre-line;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function pruefeFrageMitKI(frageId) {
+        var modal = new bootstrap.Modal(document.getElementById('kiPruefungModal'));
+        document.getElementById('modalLadeAnzeige').style.display = 'block';
+        document.getElementById('modalErgebnisText').style.style.display = 'none';
+        modal.show();
+
+        fetch('/KI/FragePruefen/' + frageId)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('modalLadeAnzeige').style.display = 'none';
+                var textFeld = document.getElementById('modalErgebnisText');
+                textFeld.innerText = data.antwort;
+                textFeld.style.display = 'block';
+            })
+            .catch(error => {
+                document.getElementById('modalLadeAnzeige').style.display = 'none';
+                var textFeld = document.getElementById('modalErgebnisText');
+                textFeld.innerText = "Fehler bei der Kommunikation mit der Gemini-KI.";
+                textFeld.style.display = 'block';
+            });
+    }
+</script>

@@ -22,11 +22,11 @@
             <label class="form-label fw-bold text-secondary mb-2">Antworten bearbeiten & richtige Option wählen</label>
             
             @{ int index = 0; }
-            @foreach (var antwort in Model.Antworten)
+            @foreach (var antwort in Model.AntwortOptionen)
             {
                 <div class="input-group mb-3">
                     <span class="input-group-text">
-                        <input class="form-check-input mt-0" type="radio" name="korrekteOptionIndex" value="@index" @(antwort.IstKorrekt ? "checked" : "") />
+                        <input class="form-check-input mt-0" type="radio" name="korrekteOptionIndex" value="@index" @(antwort.IstRichtig ? "checked" : "") />
                     </span>
                     <input type="hidden" name="antwortIds" value="@antwort.Id" />
                     <input type="text" name="antwortTexte" class="form-control" value="@antwort.Antworttext" required />

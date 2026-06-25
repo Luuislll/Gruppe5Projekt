@@ -2,7 +2,18 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm border">
+        <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold text-primary"><i class="bi bi-journal-check"></i> Klausuren-Generator</h1>
+            <p class="col-md-8 fs-4 text-muted">
+                Willkommen beim intelligenten Assistenten zur Erstellung von Multiple-Choice-Klausuren. 
+                Verwalten Sie Lehrveranstaltungen, laden Sie Skripte hoch, generieren und prüfen Sie Fragen mithilfe von Gemini-KI 
+                und stellen Sie Klausuren per Zufallsprinzip zusammen.
+            </p>
+            <a asp-controller="Lehrveranstaltung" asp-action="Index" class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-arrow-right-circle"></i> Zu den Lehrveranstaltungen
+            </a>
+        </div>
+    </div>
 </div>
