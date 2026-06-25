@@ -1,39 +1,43 @@
 @model Gruppe5Projekt.Models.MCFrage
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Frage bearbeiten";
 }
 
-<h1>Edit</h1>
-
-<h4>MCFrage</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="container mt-4" style="max-width: 750px;">
+    <div class="card shadow-sm border-0 p-4 bg-white rounded-3">
+        <h3 class="fw-bold text-warning mb-3"><i class="bi bi-pencil-square"></i> Prüfungsfrage bearbeiten</h3>
+        <hr />
+        
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Fragentext" class="control-label"></label>
-                <input asp-for="Fragentext" class="form-control" />
-                <span asp-validation-for="Fragentext" class="text-danger"></span>
+            <input type="hidden" asp-for="KapitelId" />
+
+            <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Fragentext</label>
+                <textarea name="fragentext" class="form-control" rows="3" required>@Model.Fragentext</textarea>
             </div>
-            <div class="form-group">
-                <label asp-for="KapitelId" class="control-label"></label>
-                <select asp-for="KapitelId" class="form-control" asp-items="ViewBag.KapitelId"></select>
-                <span asp-validation-for="KapitelId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <label class="form-label fw-bold text-secondary mb-2">Antworten bearbeiten & richtige Option wählen</label>
+            
+            @{ int index = 0; }
+            @foreach (var antwort in Model.Antworten)
+            {
+                <div class="input-group mb-3">
+                    <span class="input-group-text">
+                        <input class="form-check-input mt-0" type="radio" name="korrekteOptionIndex" value="@index" @(antwort.IstKorrekt ? "checked" : "") />
+                    </span>
+                    <input type="hidden" name="antwortIds" value="@antwort.Id" />
+                    <input type="text" name="antwortTexte" class="form-control" value="@antwort.Antworttext" required />
+                </div>
+                index++;
+            }
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary w-100">Änderungen speichern</button>
+                <a asp-controller="Kapitel" asp-action="Fragen" asp-route-id="@Model.KapitelId" class="btn btn-light w-100 border">Abbrechen</a>
             </div>
         </form>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
