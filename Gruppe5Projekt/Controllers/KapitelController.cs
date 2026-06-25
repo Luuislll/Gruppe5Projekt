@@ -25,7 +25,7 @@ namespace Gruppe5Projekt.Controllers
         // GET: Kapitel
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Kapitel.Include(k => k.Lehrveranstaltung);
+            var appDbContext = _context.Kapitel.Include(k => k.Lehrveranstaltung).OrderBy(k => k.Kapitelnummer);
             return View(await appDbContext.ToListAsync());
         }
 
