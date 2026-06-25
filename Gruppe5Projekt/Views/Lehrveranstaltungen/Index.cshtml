@@ -32,17 +32,17 @@
                     <tr>
                         <td class="fw-bold">@lv.Titel</td>
                         <td>@lv.Dozentenname</td>
-                        <td><span class="badge bg-secondary">@lv.Typ</span></td> <td class="text-center">
+                        <td><span class="badge bg-secondary">@lv.Niveau</span></td> <td class="text-center">
                             <a asp-controller="Kapitel" asp-action="Index" asp-route-lehrveranstaltungId="@lv.Id" class="btn btn-outline-primary btn-sm position-relative">
                                 <i class="bi bi-book"></i> Kapitel
-                                <span class="badge bg-primary rounded-pill">@lv.Kapitel?.Count</span>
+                                <span class="badge bg-primary rounded-pill">@lv.Kapitel.Count</span>
                             </a>
                         </td>
                         
                         <td class="text-center">
                             <a asp-controller="Pruefung" asp-action="Index" asp-route-lehrveranstaltungId="@lv.Id" class="btn btn-outline-purple btn-sm" style="color: #6f42c1; border-color: #6f42c1;">
                                 <i class="bi bi-file-earmark-text"></i> Prüfungen
-                                <span class="badge text-white rounded-pill" style="background-color: #6f42c1;">@lv.Pruefungen?.Count</span>
+                                <span class="badge text-white rounded-pill" style="background-color: #6f42c1;">@lv.Pruefungen.Count</span>
                             </a>
                         </td>
                         

@@ -22,11 +22,25 @@ namespace Gruppe5Projekt.Controllers
             _materialService = materialService;
         }
 
-        // GET: Kapitel
-        public async Task<IActionResult> Index()
+        // GET: Kapitel?lehrveranstaltungId=5
+        public async Task<IActionResult> Index(int? lehrveranstaltungId)
         {
-            var appDbContext = _context.Kapitel.Include(k => k.Lehrveranstaltung).OrderBy(k => k.Kapitelnummer);
-            return View(await appDbContext.ToListAsync());
+            if (lehrveranstaltungId == null)
+            {
+                return NotFound();
+            }
+
+            var lehrveranstaltung = await _context.Lehrveranstaltungen
+                .Include(l => l.Kapitel)
+                    .ThenInclude(k => k.MCFragen)
+                .FirstOrDefaultAsync(l => l.Id == lehrveranstaltungId);
+
+            if (lehrveranstaltung == null)
+            {
+                return NotFound();
+            }
+
+            return View(lehrveranstaltung);
         }
 
         // GET: Kapitel/Details/5
@@ -49,10 +63,10 @@ namespace Gruppe5Projekt.Controllers
         }
 
         // GET: Kapitel/Create
-        public IActionResult Create()
+        public IActionResult Create(int? lehrveranstaltungId)
         {
-            ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Dozentenname");
-            return View();
+            ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Titel", lehrveranstaltungId);
+            return View(new Kapitel { LehrveranstaltungId = lehrveranstaltungId ?? 0 });
         }
 
         // POST: Kapitel/Create
@@ -79,9 +93,9 @@ namespace Gruppe5Projekt.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { lehrveranstaltungId = kapitel.LehrveranstaltungId });
             }
-            ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Dozentenname", kapitel.LehrveranstaltungId);
+            ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Titel", kapitel.LehrveranstaltungId);
             return View(kapitel);
         }
 
@@ -98,7 +112,7 @@ namespace Gruppe5Projekt.Controllers
             {
                 return NotFound();
             }
-            ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Dozentenname", kapitel.LehrveranstaltungId);
+            ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Titel", kapitel.LehrveranstaltungId);
             return View(kapitel);
         }
 
@@ -145,9 +159,9 @@ namespace Gruppe5Projekt.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { lehrveranstaltungId = existing.LehrveranstaltungId });
             }
-            ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Dozentenname", kapitel.LehrveranstaltungId);
+            ViewData["LehrveranstaltungId"] = new SelectList(_context.Lehrveranstaltungen, "Id", "Titel", kapitel.LehrveranstaltungId);
             return View(kapitel);
         }
 
@@ -194,6 +208,7 @@ namespace Gruppe5Projekt.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var kapitel = await _context.Kapitel.FindAsync(id);
+            int? lehrveranstaltungId = kapitel?.LehrveranstaltungId;
             if (kapitel != null)
             {
                 await _materialService.DeleteAsync(kapitel.Vorlesungsfolien);
@@ -201,7 +216,13 @@ namespace Gruppe5Projekt.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            if (lehrveranstaltungId == null)
+            {
+                return RedirectToAction(nameof(LehrveranstaltungenController.Index), "Lehrveranstaltungen");
+            }
+
+            return RedirectToAction(nameof(Index), new { lehrveranstaltungId });
         }
 
         private bool KapitelExists(int id)

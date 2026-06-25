@@ -22,7 +22,12 @@ namespace Gruppe5Projekt.Controllers
         // GET: Lehrveranstaltungen
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Lehrveranstaltungen.ToListAsync());
+            var lehrveranstaltungen = await _context.Lehrveranstaltungen
+                .Include(l => l.Kapitel)
+                .Include(l => l.Pruefungen)
+                .OrderBy(l => l.Titel)
+                .ToListAsync();
+            return View(lehrveranstaltungen);
         }
 
         // GET: Lehrveranstaltungen/Details/5
