@@ -1,0 +1,45 @@
+@model Gruppe5Projekt.Models.ViewModels.BenutzerListeViewModel
+
+@{
+    ViewData["Title"] = "Benutzer löschen";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Benutzer wirklich löschen?
+                </div>
+                <div class="card-body">
+                    <p>Soll der folgende Benutzer endgültig gelöscht werden? Dieser Vorgang kann nicht rückgängig gemacht werden.</p>
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">E-Mail</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">Name</dt>
+                        <dd class="col-sm-8">@($"{Model.FirstName} {Model.LastName}".Trim())</dd>
+
+                        <dt class="col-sm-4">Rolle(n)</dt>
+                        <dd class="col-sm-8">
+                            @foreach (var rolle in Model.Rollen)
+                            {
+                                <span class="badge bg-secondary">@rolle</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+                <div class="card-footer">
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id"/>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Ja, löschen</button>
+                            <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Abbrechen</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

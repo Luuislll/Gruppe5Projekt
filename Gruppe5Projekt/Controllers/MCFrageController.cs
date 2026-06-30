@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,8 @@ using Gruppe5Projekt.Models;
 
 namespace Gruppe5Projekt.Controllers
 {
+    // Schreibzugriffe erfordern eine Anmeldung; Lese-Actions sind für Gäste frei.
+    [Authorize]
     public class MCFrageController : Controller
     {
         private readonly AppDbContext _context;
@@ -20,6 +23,7 @@ namespace Gruppe5Projekt.Controllers
         }
 
         // GET: MCFrage
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var appDbContext = _context.MCFragen.Include(m => m.Kapitel);
@@ -27,6 +31,7 @@ namespace Gruppe5Projekt.Controllers
         }
 
         // GET: MCFrage/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)

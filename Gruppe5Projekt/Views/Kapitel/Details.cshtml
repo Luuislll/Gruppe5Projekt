@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Details";
+    var darfBearbeiten = User.Identity?.IsAuthenticated == true;
 }
 
 <h1>Details</h1>
@@ -45,6 +46,9 @@
 </div>
 <div class="d-flex gap-2">
     <a asp-controller="Fragenkatalog" asp-action="Index" asp-route-kapitelId="@Model?.Id" class="btn btn-primary"><i class="bi bi-question-circle"></i> Fragenkatalog</a>
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+    @if (darfBearbeiten)
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+    }
     <a asp-action="Index" asp-route-lehrveranstaltungId="@Model?.LehrveranstaltungId" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Zurück zur Liste</a>
 </div>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,9 @@ using Gruppe5Projekt.Models;
 
 namespace Gruppe5Projekt.Controllers
 {
+    // Schreibzugriffe erfordern eine Anmeldung; Lese-Actions sind per
+    // [AllowAnonymous] auch für Gäste freigegeben.
+    [Authorize]
     public class PruefungController : Controller
     {
         private readonly AppDbContext _context;
@@ -21,6 +25,7 @@ namespace Gruppe5Projekt.Controllers
 
         // GET: Pruefung?lehrveranstaltungId=5
         // Zeigt die Prüfungen genau einer Lehrveranstaltung, inkl. Anzahl zugeordneter Fragen.
+        [AllowAnonymous]
         public async Task<IActionResult> Index(int lehrveranstaltungId)
         {
             var lehrveranstaltung = await _context.Lehrveranstaltungen.FindAsync(lehrveranstaltungId);
@@ -41,6 +46,7 @@ namespace Gruppe5Projekt.Controllers
         }
 
         // GET: Pruefung/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -189,6 +195,7 @@ namespace Gruppe5Projekt.Controllers
 
         // GET: Pruefung/Druckansicht/5
         // Druckbare Liste aller Fragen und Antwortoptionen einer Prüfung (ohne Layout).
+        [AllowAnonymous]
         public async Task<IActionResult> Druckansicht(int? id)
         {
             if (id == null)

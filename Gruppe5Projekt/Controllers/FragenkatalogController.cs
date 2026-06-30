@@ -2,6 +2,7 @@ using Gruppe5Projekt.Data;
 using Gruppe5Projekt.Models;
 using Gruppe5Projekt.Models.ViewModels;
 using Gruppe5Projekt.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,8 +10,10 @@ namespace Gruppe5Projekt.Controllers
 {
     /// <summary>
     /// Verwaltet den Fragenkatalog eines Kapitels: das Anlegen, Bearbeiten und
-    /// Löschen von MC-Fragen samt ihren vier Antwortmöglichkeiten.
+    /// Löschen von MC-Fragen samt ihren vier Antwortmöglichkeiten. Schreib- und
+    /// KI-Actions erfordern eine Anmeldung; das Ansehen (Index) ist für Gäste frei.
     /// </summary>
+    [Authorize]
     public class FragenkatalogController : Controller
     {
         private readonly AppDbContext _context;
@@ -29,6 +32,7 @@ namespace Gruppe5Projekt.Controllers
 
         // GET: Fragenkatalog?kapitelId=5
         // Zeigt alle Fragen des Kapitels mit ihren Antwortoptionen.
+        [AllowAnonymous]
         public async Task<IActionResult> Index(int kapitelId)
         {
             var kapitel = await _context.Kapitel

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,9 @@ using Gruppe5Projekt.Models;
 
 namespace Gruppe5Projekt.Controllers
 {
+    // Schreibzugriffe (Anlegen/Bearbeiten/Löschen) erfordern eine Anmeldung;
+    // Lese-Actions sind per [AllowAnonymous] auch für Gäste freigegeben.
+    [Authorize]
     public class LehrveranstaltungenController : Controller
     {
         private readonly AppDbContext _context;
@@ -20,6 +24,7 @@ namespace Gruppe5Projekt.Controllers
         }
 
         // GET: Lehrveranstaltungen
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var lehrveranstaltungen = await _context.Lehrveranstaltungen
@@ -31,6 +36,7 @@ namespace Gruppe5Projekt.Controllers
         }
 
         // GET: Lehrveranstaltungen/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)

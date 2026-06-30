@@ -1,12 +1,13 @@
 using Gruppe5Projekt.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Gruppe5Projekt.Data;
-
+        
 /// <summary>
 /// EF-Core-DbContext für die Verwaltung von MC-Klausuren.
 /// </summary>
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<AppUser>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {

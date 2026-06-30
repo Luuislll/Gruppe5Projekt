@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Fragenkatalog";
     var hatMaterial = !string.IsNullOrEmpty(Model.Vorlesungsfolien);
+    var darfBearbeiten = User.Identity?.IsAuthenticated == true;
 }
 
 <h1>Fragenkatalog</h1>
@@ -10,13 +11,16 @@
 <hr />
 
 <div class="d-flex flex-wrap gap-2 mb-4">
-    <button type="button" id="ki-fragen-btn" class="btn btn-success"
-            data-kapitel-id="@Model.Id"
-            @(hatMaterial ? "" : "disabled")
-            title="@(hatMaterial ? "Fragen aus dem hochgeladenen Material (PDF) generieren" : "Es ist kein Material (PDF) hinterlegt.")">
-        <i class="bi bi-cpu"></i> Neue Frage generieren
-    </button>
-    <a asp-action="Create" asp-route-kapitelId="@Model.Id" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Neue Frage anlegen</a>
+    @if (darfBearbeiten)
+    {
+        <button type="button" id="ki-fragen-btn" class="btn btn-success"
+                data-kapitel-id="@Model.Id"
+                @(hatMaterial ? "" : "disabled")
+                title="@(hatMaterial ? "Fragen aus dem hochgeladenen Material (PDF) generieren" : "Es ist kein Material (PDF) hinterlegt.")">
+            <i class="bi bi-cpu"></i> Neue Frage generieren
+        </button>
+        <a asp-action="Create" asp-route-kapitelId="@Model.Id" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Neue Frage anlegen</a>
+    }
     <a asp-controller="Kapitel" asp-action="Index" asp-route-lehrveranstaltungId="@Model.LehrveranstaltungId" class="btn btn-secondary ms-auto"><i class="bi bi-arrow-left"></i> Zurück zu den Kapiteln</a>
 </div>
 
@@ -36,11 +40,14 @@ else
         <div class="card mb-3 frage-card" data-frage-id="@frage.Id">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>Frage @nummer: @frage.Fragentext</strong>
-                <span class="d-flex gap-2">
-                    <button type="button" class="btn btn-info pruefen-btn"><i class="bi bi-robot"></i> Prüfen</button>
-                    <a asp-action="Edit" asp-route-id="@frage.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
-                    <a asp-action="Delete" asp-route-id="@frage.Id" class="btn btn-danger"><i class="bi bi-trash"></i> Löschen</a>
-                </span>
+                @if (darfBearbeiten)
+                {
+                    <span class="d-flex gap-2">
+                        <button type="button" class="btn btn-info pruefen-btn"><i class="bi bi-robot"></i> Prüfen</button>
+                        <a asp-action="Edit" asp-route-id="@frage.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+                        <a asp-action="Delete" asp-route-id="@frage.Id" class="btn btn-danger"><i class="bi bi-trash"></i> Löschen</a>
+                    </span>
+                }
             </div>
             <ul class="list-group list-group-flush">
                 @foreach (var option in frage.AntwortOptionen)

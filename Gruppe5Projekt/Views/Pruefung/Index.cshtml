@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Prüfungen";
     var lehrveranstaltungId = (int)ViewBag.LehrveranstaltungId;
+    var darfBearbeiten = User.Identity?.IsAuthenticated == true;
 }
 
 <div class="container mt-4">
@@ -16,9 +17,12 @@
             <a asp-controller="Lehrveranstaltungen" asp-action="Index" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Zurück zu den Lehrveranstaltungen
             </a>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPruefungModal">
-                <i class="bi bi-patch-plus"></i> Neue Prüfung erstellen
-            </button>
+            @if (darfBearbeiten)
+            {
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPruefungModal">
+                    <i class="bi bi-patch-plus"></i> Neue Prüfung erstellen
+                </button>
+            }
         </div>
     </div>
 
@@ -56,6 +60,8 @@
     </div>
 </div>
 
+@if (darfBearbeiten)
+{
 <div class="modal fade" id="createPruefungModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form asp-action="Erstellen" method="post">
@@ -85,3 +91,4 @@
         </form>
     </div>
 </div>
+}

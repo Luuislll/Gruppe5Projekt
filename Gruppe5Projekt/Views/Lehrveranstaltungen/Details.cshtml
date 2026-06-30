@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Details";
+    var darfBearbeiten = User.Identity?.IsAuthenticated == true;
 }
 
 <h1>Details</h1>
@@ -63,10 +64,13 @@
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <span>Prüfung vom @pruefung.Datum.ToString("dd.MM.yyyy")</span>
                     <span>
-                        <button type="button" class="btn btn-success btn-sm"
-                                data-bs-toggle="modal" data-bs-target="#fragenModal-@pruefung.Id">
-                            Fragen zusammenstellen
-                        </button>
+                        @if (darfBearbeiten)
+                        {
+                            <button type="button" class="btn btn-success btn-sm"
+                                    data-bs-toggle="modal" data-bs-target="#fragenModal-@pruefung.Id">
+                                Fragen zusammenstellen
+                            </button>
+                        }
                         <a asp-controller="Pruefung" asp-action="Details" asp-route-id="@pruefung.Id"
                            class="btn btn-secondary btn-sm">Details</a>
                     </span>
@@ -77,6 +81,7 @@
         @* Pop-up je Prüfung zur Festlegung der Fragenanzahl. *@
         @foreach (var pruefung in Model.Pruefungen)
         {
+            if (!darfBearbeiten) { continue; }
             <div class="modal fade" id="fragenModal-@pruefung.Id" tabindex="-1"
                  aria-labelledby="fragenModalLabel-@pruefung.Id" aria-hidden="true">
                 <div class="modal-dialog">
@@ -118,6 +123,9 @@
 </div>
 
 <div class="d-flex gap-2 mt-3">
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+    @if (darfBearbeiten)
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+    }
     <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Zurück zur Liste</a>
 </div>

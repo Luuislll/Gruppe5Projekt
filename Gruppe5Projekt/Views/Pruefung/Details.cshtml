@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Details";
+    var darfBearbeiten = User.Identity?.IsAuthenticated == true;
 }
 
 <h1>Details</h1>
@@ -28,10 +29,13 @@
 <div>
     <div class="d-flex justify-content-between align-items-center">
         <h4>Prüfungsfragen</h4>
-        <button type="button" class="btn btn-success btn-sm"
-                data-bs-toggle="modal" data-bs-target="#fragenModal">
-            Fragen zusammenstellen
-        </button>
+        @if (darfBearbeiten)
+        {
+            <button type="button" class="btn btn-success btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#fragenModal">
+                Fragen zusammenstellen
+            </button>
+        }
     </div>
     <hr />
 
@@ -78,11 +82,16 @@
 </div>
 
 <div class="d-flex gap-2 mt-3">
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+    @if (darfBearbeiten)
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning"><i class="bi bi-pencil"></i> Bearbeiten</a>
+    }
     <a asp-action="Index" asp-route-lehrveranstaltungId="@Model?.LehrveranstaltungId" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Zurück zur Liste</a>
 </div>
 
 @* Pop-up zur Festlegung der Fragenanzahl. *@
+@if (darfBearbeiten)
+{
 <div class="modal fade" id="fragenModal" tabindex="-1" aria-labelledby="fragenModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <form asp-action="FragenZusammenstellen" asp-route-id="@Model?.Id" method="post">
@@ -111,3 +120,4 @@
         </form>
     </div>
 </div>
+}

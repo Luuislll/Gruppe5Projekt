@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,9 @@ using Gruppe5Projekt.Services;
 
 namespace Gruppe5Projekt.Controllers
 {
+    // Schreibzugriffe erfordern eine Anmeldung; Lese-Actions sind per
+    // [AllowAnonymous] auch für Gäste freigegeben.
+    [Authorize]
     public class KapitelController : Controller
     {
         private readonly AppDbContext _context;
@@ -23,6 +27,7 @@ namespace Gruppe5Projekt.Controllers
         }
 
         // GET: Kapitel?lehrveranstaltungId=5
+        [AllowAnonymous]
         public async Task<IActionResult> Index(int? lehrveranstaltungId)
         {
             if (lehrveranstaltungId == null)
@@ -44,6 +49,7 @@ namespace Gruppe5Projekt.Controllers
         }
 
         // GET: Kapitel/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -166,6 +172,7 @@ namespace Gruppe5Projekt.Controllers
         }
 
         // GET: Kapitel/Download/5
+        [AllowAnonymous]
         public async Task<IActionResult> Download(int id)
         {
             var kapitel = await _context.Kapitel.FindAsync(id);
