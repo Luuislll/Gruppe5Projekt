@@ -23,15 +23,27 @@ namespace Gruppe5Projekt.Controllers
             _context = context;
         }
 
-        // GET: Lehrveranstaltungen
+        // GET: Lehrveranstaltungen?suchbegriff=...
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? suchbegriff)
         {
-            var lehrveranstaltungen = await _context.Lehrveranstaltungen
+            var query = _context.Lehrveranstaltungen
                 .Include(l => l.Kapitel)
                 .Include(l => l.Pruefungen)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(suchbegriff))
+            {
+                var begriff = suchbegriff.Trim();
+                query = query.Where(l =>
+                    l.Titel.Contains(begriff) || l.Dozentenname.Contains(begriff));
+            }
+
+            var lehrveranstaltungen = await query
                 .OrderBy(l => l.Titel)
                 .ToListAsync();
+
+            ViewBag.Suchbegriff = suchbegriff;
             return View(lehrveranstaltungen);
         }
 
