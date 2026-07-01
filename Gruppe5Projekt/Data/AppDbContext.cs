@@ -68,10 +68,14 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .HasForeignKey(pf => pf.PruefungId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Kein Cascade auf diesem Pfad: Sonst entstünde ein zweiter
+        // Cascade-Pfad zur Verbindungstabelle (Lehrveranstaltung → Kapitel →
+        // MCFrage → PruefungMCFrage neben Lehrveranstaltung → Pruefung →
+        // PruefungMCFrage), was SQL Server nicht erlaubt.
         modelBuilder.Entity<PruefungMCFrage>()
             .HasOne(pf => pf.MCFrage)
             .WithMany(f => f.PruefungMCFragen)
             .HasForeignKey(pf => pf.MCFrageId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

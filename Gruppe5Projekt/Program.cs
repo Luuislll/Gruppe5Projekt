@@ -11,8 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseAzureSql(connectionString));
 
 // ASP.NET Core Identity: Benutzer- und Rollenverwaltung als Service.
 // Es wird bewusst nur der Identity-Dienst registriert (kein Default-UI von
