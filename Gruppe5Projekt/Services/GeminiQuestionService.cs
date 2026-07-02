@@ -28,7 +28,10 @@ public class GeminiQuestionService
     /// der erwarteten Struktur ist (Fragentext + vier Antwortoptionen).
     /// </summary>
     public async Task<GenerierteFrage> GenerateQuestionAsync(
-        Kapitel kapitel, Stream pdfStream, CancellationToken cancellationToken = default)
+        Kapitel kapitel,
+        Stream pdfStream,
+        IReadOnlyList<string>? vorhandeneFragen = null,
+        CancellationToken cancellationToken = default)
     {
         // PDF in binärer Form (Byte-Array) in den Speicher laden.
         await using var buffer = new MemoryStream();
@@ -44,6 +47,17 @@ public class GeminiQuestionService
             $"\"{kapitel.Titel}\". Die Frage (fragentext) muss genau vier Antwortoptionen " +
             $"(antworten) haben, von denen genau eine korrekt ist (istRichtig = true), die " +
             $"übrigen falsch (istRichtig = false). Formuliere Frage und Antworten auf Deutsch.";
+
+        // Bereits vorhandene Fragen mitgeben, damit Gemini eine inhaltlich neue,
+        // nicht doppelte Frage erzeugt.
+        if (vorhandeneFragen is { Count: > 0 })
+        {
+            var bestehendeFragen = string.Join("\n", vorhandeneFragen.Select(f => $"- {f}"));
+            prompt +=
+                "\n\nZu diesem Kapitel existieren bereits die folgenden Fragen. Erzeuge eine " +
+                "inhaltlich neue Frage, die sich klar von diesen unterscheidet, und wiederhole " +
+                "keine bereits abgedeckten Inhalte:\n" + bestehendeFragen;
+        }
 
         // Anfrage aus Prompt und Datei zusammensetzen.
         Content content = new() { Parts = new List<Part>() };

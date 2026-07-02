@@ -13,6 +13,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <style>
         body { background-color: #fff; color: #000; }
+        /* Bootstrap blendet Labels deaktivierter Checkboxen mit opacity .5 aus –
+           für die Druckansicht soll der Antworttext voll lesbar (schwarz) sein. */
+        .form-check-input:disabled ~ .form-check-label,
+        .form-check-input[disabled] ~ .form-check-label {
+            opacity: 1;
+            color: #000;
+        }
         @@media print {
             .no-print { display: none !important; }
         }

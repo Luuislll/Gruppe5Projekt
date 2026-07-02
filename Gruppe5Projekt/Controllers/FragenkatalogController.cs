@@ -55,7 +55,9 @@ namespace Gruppe5Projekt.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GenerateAIQuestion(int kapitelId)
         {
-            var kapitel = await _context.Kapitel.FindAsync(kapitelId);
+            var kapitel = await _context.Kapitel
+                .Include(k => k.MCFragen)
+                .FirstOrDefaultAsync(k => k.Id == kapitelId);
             if (kapitel == null)
             {
                 return NotFound();
@@ -67,6 +69,11 @@ namespace Gruppe5Projekt.Controllers
                 return BadRequest("Für dieses Kapitel ist kein Material (PDF) hinterlegt.");
             }
 
+            // Bereits vorhandene Fragentexte, damit Gemini keine doppelte Frage erzeugt.
+            var vorhandeneFragen = kapitel.MCFragen
+                .Select(f => f.Fragentext)
+                .ToList();
+
             // Zugehöriges Material (PDF) aus dem Storage Container laden.
             var material = await _materialService.DownloadAsync(kapitel.Vorlesungsfolien);
             if (material == null)
@@ -77,7 +84,8 @@ namespace Gruppe5Projekt.Controllers
             await using var pdfStream = material.Value.Content;
 
             // PDF an Gemini übergeben und eine MC-Frage generieren lassen.
-            var generierteFrage = await _geminiService.GenerateQuestionAsync(kapitel, pdfStream);
+            var generierteFrage = await _geminiService.GenerateQuestionAsync(
+                kapitel, pdfStream, vorhandeneFragen);
 
             // Frage samt Antwortoptionen sofort in den Katalog übernehmen (DB-Update).
             var frage = new MCFrage
